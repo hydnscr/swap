@@ -162,14 +162,10 @@ async function fetchProfile(user) {
       .select('username, swap_plus')
       .eq('id', user.id)
       .maybeSingle();
-      console.log('Profile data:', data);
     if (data) {
       username   = data.username || user.email.split('@')[0];
       isSwapPlus = data.swap_plus || false;
       if (isSwapPlus) localStorage.setItem('swap_plus', 'true');
-    } else {
-      // No profile yet — use email as fallback
-      username = user.email.split('@')[0];
     }
   } catch (e) {
     console.warn('Could not fetch profile:', e);
@@ -251,10 +247,57 @@ sb.auth.onAuthStateChange(async (event, session) => {
   updateHeaderAuth();
 })();
 
+// ── Cloud library (Swap+ only) ────────────────────────────────────────────────
+async function getCloudLibrary() {
+  if (!currentUser) return [];
+  try {
+    const { data, error } = await sb
+      .from('library')
+      .select('title, type, data')
+      .eq('user_id', currentUser.id);
+    if (error) throw error;
+    return (data || []).map(row => row.data);
+  } catch (e) {
+    console.warn('Could not load cloud library:', e);
+    return [];
+  }
+}
+
+async function toggleCloudSave(rec) {
+  if (!currentUser) return false;
+  try {
+    const { data: existing } = await sb
+      .from('library')
+      .select('id')
+      .eq('user_id', currentUser.id)
+      .eq('title', rec.title)
+      .eq('type', rec.type)
+      .maybeSingle();
+
+    if (existing) {
+      await sb.from('library').delete().eq('id', existing.id);
+      return false;
+    } else {
+      await sb.from('library').insert({
+        user_id: currentUser.id,
+        title: rec.title,
+        type: rec.type,
+        data: rec,
+      });
+      return true;
+    }
+  } catch (e) {
+    console.warn('Could not toggle cloud save:', e);
+    return false;
+  }
+}
+
 // ── Expose for app.js ─────────────────────────────────────────────────────────
 window.Auth = {
   isSwapPlus: () => isSwapPlus,
   isLoggedIn: () => !!currentUser,
   showPaywall: showPaywallModal,
   showAuth:    showAuthModal,
+  getCloudLibrary,
+  toggleCloudSave,
 };

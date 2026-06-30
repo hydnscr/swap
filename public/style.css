@@ -8,7 +8,7 @@
   --paper:    #faf8f4;
   --paper-2:  #f1ede6;
   --paper-3:  #e5e0d8;
-  --header: #7A4A2E;
+  --header:   #1a1714;
   --accent:   #c84b2f;
   --accent-2: #f0e8e4;
   --card-bg:  #ffffff;
@@ -588,4 +588,21 @@ body {
   justify-content: center;
   font-family: var(--font-display);
   flex-shrink: 0;
+}
+
+/* ── Library sync notice ── */
+.library-notice {
+  font-size: 0.8rem;
+  color: var(--ink-3);
+  background: var(--paper-2);
+  border: 1px solid var(--paper-3);
+  border-radius: 10px;
+  padding: 0.6rem 1rem;
+  margin-top: 0.75rem;
+  display: inline-block;
+}
+.library-notice a {
+  color: var(--accent);
+  font-weight: 500;
+  text-decoration: underline;
 }
