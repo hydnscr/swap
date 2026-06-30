@@ -1,0 +1,8 @@
+[build]
+  publish = "public"
+  functions = "netlify/functions"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' cdn.jsdelivr.net; connect-src 'self' cdn.jsdelivr.net *.supabase.co api.themoviedb.org openlibrary.org covers.openlibrary.org fonts.googleapis.com fonts.gstatic.com *.omdbapi.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com data:; img-src 'self' data: image.tmdb.org covers.openlibrary.org https:;"
