@@ -8,7 +8,7 @@
   --paper:    #faf8f4;
   --paper-2:  #f1ede6;
   --paper-3:  #e5e0d8;
-  --header:   #1a1714;
+  --header: #7A4A2E;
   --accent:   #c84b2f;
   --accent-2: #f0e8e4;
   --card-bg:  #ffffff;
@@ -432,7 +432,7 @@ body {
   flex-direction: column;
   opacity: 0;
   transform: translateY(16px);
-  animation: cardIn .4s ease forwards;
+  animation: cardIn .5s ease forwards;
   animation-delay: var(--card-delay, 0s);
   transition: transform .2s, box-shadow .2s;
 }

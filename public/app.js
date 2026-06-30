@@ -1,4 +1,4 @@
-// ── Config ───────────────────────────────────────────────────────────────────
+//── Config ───────────────────────────────────────────────────────────────────
 const TMDB_KEY   = 'e51b8a5ecfa3b724ecee680963f354f0';
 const FREE_LIMIT = 3;
 
@@ -300,7 +300,7 @@ function buildCard(rec, index = 0, inLibrary = false) {
 
   const card = document.createElement('div');
   card.className = 'card' + (inLibrary ? ' clickable' : '');
-  card.style.setProperty('--card-delay', `${index * 0.1}s`);
+  card.style.setProperty('--card-delay', `${index * 0.18}s`);
 
   card.innerHTML = `
     <div class="card-cover-wrap">
