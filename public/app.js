@@ -235,7 +235,7 @@ async function doSwap() {
 async function callSwapAPI(item) {
   const targetMedium = item.type === 'book' ? 'films or series' : 'books';
   const sourceMedium = item.type === 'book' ? 'book' : 'film/series';
-  const res = await fetch('/.netlify/functions/swap', {
+  const res = await fetch('/api/swap', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ title: item.title, sourceMedium, targetMedium, synopsis: item.synopsis }),
   });

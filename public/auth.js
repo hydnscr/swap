@@ -263,7 +263,7 @@ function setupAuthListener() {
 // ── Init — load config first, then set up Supabase ───────────────────────────
 async function init() {
   try {
-    const res  = await fetch('/.netlify/functions/config');
+    const res = await fetch('/api/config');
     const data = await res.json();
     SUPABASE_URL        = data.supabaseUrl;
     SUPABASE_ANON       = data.supabaseAnon;
