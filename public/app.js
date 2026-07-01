@@ -201,7 +201,7 @@ searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') doSwap(); 
 async function doSwap() {
   const query = searchInput.value.trim();
   if (!query) return;
-  if (!checkLimit()) { window.Auth?.showPaywall(); return; }
+  if (!checkLimit()) { window.Auth?.showPaywall('limit'); return; }
 
   const item = selectedItem || { title: query, synopsis: '', type: mode };
   showLoading(item.type);

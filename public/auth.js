@@ -75,13 +75,23 @@ function hideAuthModal() {
   if (authUsername) authUsername.value = '';
   authError.textContent = '';
 }
-function showPaywallModal() { paywallModal.classList.remove('hidden'); }
+function showPaywallModal(reason = 'limit') {
+  paywallModal.classList.remove('hidden');
+  const msg = document.getElementById('swaps-left-msg');
+  if (msg) {
+    if (reason === 'limit') {
+      msg.textContent = "You've used all 3 of your free swaps today.";
+    } else {
+      msg.textContent = "Unlock all features with Swap+.";
+    }
+  }
+}
 function hidePaywallModal() { paywallModal.classList.add('hidden'); }
 
 authClose.addEventListener('click', hideAuthModal);
 
 // Swap+ header button
-headerSwapPlusBtn?.addEventListener('click', () => showPaywallModal());
+headerSwapPlusBtn?.addEventListener('click', () => showPaywallModal('upgrade'));
 authModal.addEventListener('click', e => { if (e.target === authModal) hideAuthModal(); });
 paywallClose.addEventListener('click', hidePaywallModal);
 paywallModal.addEventListener('click', e => { if (e.target === paywallModal) hidePaywallModal(); });
@@ -155,8 +165,7 @@ paywallLoginBtn.addEventListener('click', () => { hidePaywallModal(); showAuthMo
 paywallUpgradeBtn.addEventListener('click', () => {
   if (!currentUser) { hidePaywallModal(); showAuthModal('signup'); return; }
   // Build redirect URL back to the app with ?unlocked=true
-  const redirectUrl = encodeURIComponent(window.location.origin + '/?unlocked=true');
-  const url = `${STRIPE_PAYMENT_LINK}?prefilled_email=${encodeURIComponent(currentUser.email)}&redirect_url=${redirectUrl}`;
+  const url = `${STRIPE_PAYMENT_LINK}?prefilled_email=${encodeURIComponent(currentUser.email)}`;
   window.location.href = url;
 });
 
