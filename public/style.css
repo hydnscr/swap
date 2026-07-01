@@ -192,72 +192,102 @@ body {
 /* ── Streaming modal content ── */
 .stream-modal-title {
   font-family: var(--font-display);
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   font-weight: 600;
   margin-bottom: 0.25rem;
+  color: var(--ink);
 }
-.stream-modal-year { font-size: 0.8rem; color: var(--ink-3); margin-bottom: 1rem; }
-.stream-section-label {
-  font-size: 0.7rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: .06em;
+.stream-modal-year {
+  font-size: 0.85rem;
   color: var(--ink-3);
-  margin-bottom: 8px;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--paper-3);
+}
+.stream-section-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--accent);
+  margin-bottom: 10px;
 }
 .stream-badges {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 1rem;
+  gap: 10px;
+  margin-bottom: 1.25rem;
 }
 .stream-badge-lg {
-  padding: 6px 14px;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  background: var(--paper-2);
-  color: var(--ink-2);
-  border: 1px solid var(--paper-3);
-}
-.stream-none {
-  font-size: 0.875rem;
-  color: var(--ink-3);
-  font-style: italic;
-  margin-bottom: 1rem;
-}
-.stream-jw-link {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.85rem;
+  padding: 9px 16px;
+  border-radius: 24px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  background: var(--accent-2);
   color: var(--accent);
-  text-decoration: none;
-  border: 1px solid var(--accent);
-  border-radius: 8px;
-  padding: 6px 14px;
-  transition: all .15s;
+  border: 1.5px solid var(--accent);
 }
-.stream-jw-link:hover { background: var(--accent); color: white; }
+.stream-badge-lg::before {
+  content: "▶";
+  font-size: 0.6rem;
+}
+.stream-none {
+  font-size: 0.9rem;
+  color: var(--ink-3);
+  font-style: italic;
+  margin-bottom: 1.25rem;
+  background: var(--paper-2);
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px dashed var(--paper-3);
+}
+.stream-jw-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #fff;
+  text-decoration: none;
+  background: var(--accent);
+  border-radius: 10px;
+  padding: 12px 18px;
+  transition: all .15s;
+  box-shadow: 0 2px 10px rgba(200,75,47,.25);
+}
+.stream-jw-link:hover { opacity: 0.9; transform: translateY(-1px); }
 
 /* Book modal links */
 .book-links { display: flex; flex-direction: column; gap: 10px; margin-top: 0.5rem; }
 .book-link {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  border-radius: 10px;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
   text-decoration: none;
-  font-size: 0.875rem;
-  font-weight: 500;
-  border: 1px solid var(--paper-3);
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: 1.5px solid var(--paper-3);
   background: var(--paper-2);
   color: var(--ink-2);
   transition: all .15s;
 }
-.book-link:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-2); }
-.book-link-icon { font-size: 1.2rem; }
+.book-link:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-2);
+  transform: translateX(3px);
+}
+.book-link-icon {
+  font-size: 1.3rem;
+  width: 32px;
+  text-align: center;
+}
 
 /* ── Views ── */
 .view { display: none; padding: 2rem; max-width: 900px; margin: 0 auto; position: relative; }
@@ -431,15 +461,15 @@ body {
   display: flex;
   flex-direction: column;
   opacity: 0;
-  transform: translateY(16px);
-  animation: cardIn .5s ease forwards;
+  transform: translateY(24px) scale(0.96);
+  animation: cardIn .6s cubic-bezier(.21,.94,.39,.99) forwards;
   animation-delay: var(--card-delay, 0s);
   transition: transform .2s, box-shadow .2s;
 }
 .card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(15,14,13,.12); }
 .card.clickable { cursor: pointer; }
 
-@keyframes cardIn { to { opacity: 1; transform: translateY(0); } }
+@keyframes cardIn { to { opacity: 1; transform: translateY(0) scale(1); } }
 
 .card-cover-wrap {
   position: relative; aspect-ratio: 2/3;

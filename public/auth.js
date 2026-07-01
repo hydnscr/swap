@@ -35,6 +35,7 @@ const headerAvatar       = document.getElementById('header-avatar');
 const headerUsername     = document.getElementById('header-username');
 const headerSignoutBtn   = document.getElementById('header-signout');
 const usernameWrap       = document.getElementById('auth-username-wrap');
+const headerSwapPlusBtn  = document.getElementById('header-swapplus-btn');
 
 // ── Auth mode ─────────────────────────────────────────────────────────────────
 let authMode = 'signup';
@@ -78,6 +79,9 @@ function showPaywallModal() { paywallModal.classList.remove('hidden'); }
 function hidePaywallModal() { paywallModal.classList.add('hidden'); }
 
 authClose.addEventListener('click', hideAuthModal);
+
+// Swap+ header button
+headerSwapPlusBtn?.addEventListener('click', () => showPaywallModal());
 authModal.addEventListener('click', e => { if (e.target === authModal) hideAuthModal(); });
 paywallClose.addEventListener('click', hidePaywallModal);
 paywallModal.addEventListener('click', e => { if (e.target === paywallModal) hidePaywallModal(); });
@@ -150,7 +154,9 @@ paywallLoginBtn.addEventListener('click', () => { hidePaywallModal(); showAuthMo
 // ── Stripe upgrade ────────────────────────────────────────────────────────────
 paywallUpgradeBtn.addEventListener('click', () => {
   if (!currentUser) { hidePaywallModal(); showAuthModal('signup'); return; }
-  const url = `${STRIPE_PAYMENT_LINK}?prefilled_email=${encodeURIComponent(currentUser.email)}`;
+  // Build redirect URL back to the app with ?unlocked=true
+  const redirectUrl = encodeURIComponent(window.location.origin + '/?unlocked=true');
+  const url = `${STRIPE_PAYMENT_LINK}?prefilled_email=${encodeURIComponent(currentUser.email)}&redirect_url=${redirectUrl}`;
   window.location.href = url;
 });
 
@@ -221,6 +227,14 @@ function updateHeaderAuth() {
   } else {
     headerAuthBtn.classList.remove('hidden');
     headerUserEl.classList.add('hidden');
+  }
+  // Show Swap+ button only when user is not already Swap+
+  if (headerSwapPlusBtn) {
+    if (isSwapPlus) {
+      headerSwapPlusBtn.classList.add('hidden');
+    } else {
+      headerSwapPlusBtn.classList.remove('hidden');
+    }
   }
 }
 

@@ -152,14 +152,17 @@ async function fetchAutocomplete(q) {
   try {
     let items = [];
     if (mode === 'book') {
-      const res  = await fetch(`https://openlibrary.org/search.json?q=${enc(q)}&limit=5&fields=title,author_name,cover_i,first_sentence,key`);
+      const res  = await fetch(`https://openlibrary.org/search.json?q=${enc(q)}&limit=8&fields=title,author_name,cover_i,first_sentence,key,edition_count&sort=editions`);
       const data = await res.json();
-      items = (data.docs || []).map(b => ({
-        title: b.title, subtitle: b.author_name?.[0] || '',
-        thumb: b.cover_i ? `https://covers.openlibrary.org/b/id/${b.cover_i}-S.jpg` : '',
-        cover: b.cover_i ? `https://covers.openlibrary.org/b/id/${b.cover_i}-M.jpg` : '',
-        synopsis: b.first_sentence?.[0] || '', type: 'book', author: b.author_name?.[0] || '', ol_key: b.key,
-      }));
+      items = (data.docs || [])
+        .sort((a, b) => (b.edition_count || 0) - (a.edition_count || 0))
+        .slice(0, 5)
+        .map(b => ({
+          title: b.title, subtitle: b.author_name?.[0] || '',
+          thumb: b.cover_i ? `https://covers.openlibrary.org/b/id/${b.cover_i}-S.jpg` : '',
+          cover: b.cover_i ? `https://covers.openlibrary.org/b/id/${b.cover_i}-M.jpg` : '',
+          synopsis: b.first_sentence?.[0] || '', type: 'book', author: b.author_name?.[0] || '', ol_key: b.key,
+        }));
     } else {
       const res  = await fetch(`https://api.themoviedb.org/3/search/multi?query=${enc(q)}&api_key=${TMDB_KEY}&language=en-US`);
       const data = await res.json();
@@ -234,7 +237,7 @@ async function callSwapAPI(item) {
 async function enrichRec(rec) {
   try {
     if (rec.type === 'book') {
-      const res  = await fetch(`https://openlibrary.org/search.json?q=${enc(rec.title + ' ' + (rec.author || ''))}&limit=1&fields=title,author_name,cover_i,first_sentence`);
+      const res  = await fetch(`https://openlibrary.org/search.json?q=${enc(rec.title + ' ' + (rec.author || ''))}&limit=1&fields=title,author_name,cover_i,first_sentence&sort=editions`);
       const data = await res.json();
       const b = data.docs?.[0];
       if (b) {
@@ -300,7 +303,7 @@ function buildCard(rec, index = 0, inLibrary = false) {
 
   const card = document.createElement('div');
   card.className = 'card' + (inLibrary ? ' clickable' : '');
-  card.style.setProperty('--card-delay', `${index * 0.18}s`);
+  card.style.setProperty('--card-delay', `${index * 0.25}s`);
 
   card.innerHTML = `
     <div class="card-cover-wrap">
@@ -468,6 +471,13 @@ function checkLimit() {
   const data  = JSON.parse(localStorage.getItem('swap_limit') || '{}');
   if (data.date !== today) return true;
   return (data.count || 0) < FREE_LIMIT;
+}
+function swapsLeft() {
+  if (window.Auth?.isSwapPlus()) return '∞';
+  const today = new Date().toDateString();
+  const data  = JSON.parse(localStorage.getItem('swap_limit') || '{}');
+  const used  = data.date === today ? (data.count || 0) : 0;
+  return Math.max(0, FREE_LIMIT - used);
 }
 function incrementLimit() {
   const today = new Date().toDateString();
