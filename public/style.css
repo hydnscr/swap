@@ -388,6 +388,27 @@ body {
 .swap-btn:active { transform: scale(0.98); }
 .swap-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+.swap-plus-btn {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #7A4A2E;
+  background: #f5c98a;
+  border: none;
+  border-radius: 20px;
+  padding: 0.4rem 1.1rem;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: all .15s;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0,0,0,.2);
+  letter-spacing: 0.01em;
+}
+.swap-plus-btn:hover {
+  background: #f0e4c4;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,.25);
+}
+
 /* ── Autocomplete ── */
 .autocomplete-list {
   position: absolute;
