@@ -417,13 +417,15 @@ async function renderLibrary() {
       libraryNotice.innerHTML = '✨ Your library is synced across all your devices.';
       libraryNotice.classList.remove('hidden');
     } else {
-      libraryNotice.innerHTML = 'Your library is saved on this device only. <a href="#" id="notice-upgrade">Upgrade to Swap+</a> to sync across all your devices.';
-      libraryNotice.classList.remove('hidden');
-      document.getElementById('notice-upgrade')?.addEventListener('click', e => {
-        e.preventDefault();
-        window.Auth?.showPaywall('upgrade');
-      });
-    }
+  libraryNotice.innerHTML = 'Your library is saved on this device only. <button id="notice-upgrade" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:0.8rem;text-decoration:underline;font-family:var(--font-body);padding:0;">Upgrade to Swap+</button> to sync across all your devices.';
+  libraryNotice.classList.remove('hidden');
+  setTimeout(() => {
+    document.getElementById('notice-upgrade')?.addEventListener('click', e => {
+      e.preventDefault();
+      window.Auth?.showPaywall('upgrade');
+    });
+  }, 0);
+}
   }
 
   const all   = await getSaved();
