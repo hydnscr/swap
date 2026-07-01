@@ -1,16 +1,13 @@
-// ── Supabase config ───────────────────────────────────────────────────────────
-const SUPABASE_URL  = 'https://scauksmvxzrtcttnesyw.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjYXVrc212eHpydGN0dG5lc3l3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2NTU5NTYsImV4cCI6MjA5ODIzMTk1Nn0.tnr81Xb-Wiqb_XvBhNwGKl8fdQEnMSA2ioGI4KiqhTk';
-
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-
-// ── Stripe config ─────────────────────────────────────────────────────────────
-const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/test_fZu7sDbun2qJb99eugg3600';
+// ── Config loaded from Netlify function (keeps keys out of frontend code) ─────
+let SUPABASE_URL        = '';
+let SUPABASE_ANON       = '';
+let STRIPE_PAYMENT_LINK = '';
 
 // ── Auth state ────────────────────────────────────────────────────────────────
-let currentUser = null;
-let isSwapPlus  = false;
-let username    = null;
+let sb            = null;
+let currentUser   = null;
+let isSwapPlus    = false;
+let username      = null;
 
 // ── DOM refs ──────────────────────────────────────────────────────────────────
 const authModal          = document.getElementById('auth-modal');
@@ -75,6 +72,7 @@ function hideAuthModal() {
   if (authUsername) authUsername.value = '';
   authError.textContent = '';
 }
+
 function showPaywallModal(reason = 'limit') {
   paywallModal.classList.remove('hidden');
   const msg   = document.getElementById('swaps-left-msg');
@@ -87,16 +85,15 @@ function showPaywallModal(reason = 'limit') {
     if (msg)   msg.textContent   = "Unlock all features with Swap+.";
   }
 }
-
 function hidePaywallModal() { paywallModal.classList.add('hidden'); }
 
 authClose.addEventListener('click', hideAuthModal);
-
-// Swap+ header button
-headerSwapPlusBtn?.addEventListener('click', () => showPaywallModal('upgrade'));
 authModal.addEventListener('click', e => { if (e.target === authModal) hideAuthModal(); });
 paywallClose.addEventListener('click', hidePaywallModal);
 paywallModal.addEventListener('click', e => { if (e.target === paywallModal) hidePaywallModal(); });
+
+// Swap+ header button
+headerSwapPlusBtn?.addEventListener('click', () => showPaywallModal('upgrade'));
 
 // ── Sign up / log in ──────────────────────────────────────────────────────────
 authForm.addEventListener('submit', async e => {
@@ -115,26 +112,19 @@ authForm.addEventListener('submit', async e => {
       if (!uname) throw new Error('Please choose a username.');
       if (uname.length < 2) throw new Error('Username must be at least 2 characters.');
 
-      // Check username isn't taken
       const { data: existing } = await sb
         .from('profiles')
         .select('username')
         .eq('username', uname)
         .maybeSingle();
-
       if (existing) throw new Error('That username is already taken.');
 
       const { data, error } = await sb.auth.signUp({ email, password });
       if (error) throw error;
 
-      // Save profile
       await sb.from('profiles').upsert({
-        id:        data.user.id,
-        email,
-        username:  uname,
-        swap_plus: false,
+        id: data.user.id, email, username: uname, swap_plus: false,
       });
-
       hideAuthModal();
 
     } else {
@@ -153,25 +143,21 @@ authForm.addEventListener('submit', async e => {
 // ── Sign out ──────────────────────────────────────────────────────────────────
 headerSignoutBtn.addEventListener('click', async () => {
   await sb.auth.signOut();
-  currentUser = null;
-  isSwapPlus  = false;
-  username    = null;
+  currentUser = null; isSwapPlus = false; username = null;
   updateHeaderAuth();
 });
 
-// ── Header auth button ────────────────────────────────────────────────────────
 headerAuthBtn.addEventListener('click', () => showAuthModal('login'));
 paywallLoginBtn.addEventListener('click', () => { hidePaywallModal(); showAuthModal('login'); });
 
 // ── Stripe upgrade ────────────────────────────────────────────────────────────
 paywallUpgradeBtn.addEventListener('click', () => {
   if (!currentUser) { hidePaywallModal(); showAuthModal('signup'); return; }
-  // Build redirect URL back to the app with ?unlocked=true
   const url = `${STRIPE_PAYMENT_LINK}?prefilled_email=${encodeURIComponent(currentUser.email)}`;
   window.location.href = url;
 });
 
-// ── Fetch profile (username + swap_plus) ──────────────────────────────────────
+// ── Fetch profile ─────────────────────────────────────────────────────────────
 async function fetchProfile(user) {
   try {
     const { data } = await sb
@@ -183,6 +169,8 @@ async function fetchProfile(user) {
       username   = data.username || user.email.split('@')[0];
       isSwapPlus = data.swap_plus || false;
       if (isSwapPlus) localStorage.setItem('swap_plus', 'true');
+    } else {
+      username = user.email.split('@')[0];
     }
   } catch (e) {
     console.warn('Could not fetch profile:', e);
@@ -196,19 +184,13 @@ async function handleStripeReturn() {
   if (params.get('unlocked') !== 'true') return;
   window.history.replaceState({}, '', window.location.pathname);
   if (!currentUser) return;
-
   try {
-    await sb.from('profiles').upsert({
-      id: currentUser.id,
-      email: currentUser.email,
-      swap_plus: true,
-    });
+    await sb.from('profiles').upsert({ id: currentUser.id, email: currentUser.email, swap_plus: true });
     localStorage.setItem('swap_plus', 'true');
     isSwapPlus = true;
     updateHeaderAuth();
     showUnlockedBanner();
   } catch (e) {
-    console.warn('Could not save Swap+:', e);
     localStorage.setItem('swap_plus', 'true');
     isSwapPlus = true;
     showUnlockedBanner();
@@ -221,8 +203,7 @@ function showUnlockedBanner() {
     position:fixed;top:80px;left:50%;transform:translateX(-50%);
     background:#3d2e22;color:#fff;padding:12px 24px;border-radius:12px;
     font-size:0.9rem;z-index:300;box-shadow:0 4px 20px rgba(0,0,0,.2);
-    animation:cardIn .4s ease forwards;white-space:nowrap;
-  `;
+    white-space:nowrap;`;
   banner.innerHTML = '✨ Swap+ unlocked! Unlimited swaps, forever.';
   document.body.appendChild(banner);
   setTimeout(() => banner.remove(), 4000);
@@ -239,90 +220,80 @@ function updateHeaderAuth() {
     headerAuthBtn.classList.remove('hidden');
     headerUserEl.classList.add('hidden');
   }
-  // Show Swap+ button only when user is not already Swap+
   if (headerSwapPlusBtn) {
-    if (isSwapPlus) {
-      headerSwapPlusBtn.classList.add('hidden');
-    } else {
-      headerSwapPlusBtn.classList.remove('hidden');
-    }
+    if (isSwapPlus) headerSwapPlusBtn.classList.add('hidden');
+    else            headerSwapPlusBtn.classList.remove('hidden');
   }
 }
 
-// ── Auth state listener ───────────────────────────────────────────────────────
-sb.auth.onAuthStateChange(async (event, session) => {
-  currentUser = session?.user || null;
-  if (currentUser) {
-    await fetchProfile(currentUser);
-    updateHeaderAuth();
-    await handleStripeReturn();
-  } else {
-    updateHeaderAuth();
-  }
-});
-
-// ── Init ──────────────────────────────────────────────────────────────────────
-(async () => {
-  const { data: { session } } = await sb.auth.getSession();
-  currentUser = session?.user || null;
-  if (currentUser) {
-    await fetchProfile(currentUser);
-    await handleStripeReturn();
-  }
-  updateHeaderAuth();
-})();
-
-// ── Cloud library (Swap+ only) ────────────────────────────────────────────────
+// ── Cloud library ─────────────────────────────────────────────────────────────
 async function getCloudLibrary() {
   if (!currentUser) return [];
   try {
-    const { data, error } = await sb
-      .from('library')
-      .select('title, type, data')
-      .eq('user_id', currentUser.id);
+    const { data, error } = await sb.from('library').select('title, type, data').eq('user_id', currentUser.id);
     if (error) throw error;
     return (data || []).map(row => row.data);
-  } catch (e) {
-    console.warn('Could not load cloud library:', e);
-    return [];
-  }
+  } catch (e) { console.warn('Could not load cloud library:', e); return []; }
 }
 
 async function toggleCloudSave(rec) {
   if (!currentUser) return false;
   try {
-    const { data: existing } = await sb
-      .from('library')
-      .select('id')
-      .eq('user_id', currentUser.id)
-      .eq('title', rec.title)
-      .eq('type', rec.type)
-      .maybeSingle();
-
+    const { data: existing } = await sb.from('library').select('id')
+      .eq('user_id', currentUser.id).eq('title', rec.title).eq('type', rec.type).maybeSingle();
     if (existing) {
       await sb.from('library').delete().eq('id', existing.id);
       return false;
     } else {
-      await sb.from('library').insert({
-        user_id: currentUser.id,
-        title: rec.title,
-        type: rec.type,
-        data: rec,
-      });
+      await sb.from('library').insert({ user_id: currentUser.id, title: rec.title, type: rec.type, data: rec });
       return true;
     }
-  } catch (e) {
-    console.warn('Could not toggle cloud save:', e);
-    return false;
-  }
+  } catch (e) { console.warn('Could not toggle cloud save:', e); return false; }
 }
+
+// ── Auth state listener ───────────────────────────────────────────────────────
+function setupAuthListener() {
+  sb.auth.onAuthStateChange(async (event, session) => {
+    currentUser = session?.user || null;
+    if (currentUser) { await fetchProfile(currentUser); await handleStripeReturn(); }
+    updateHeaderAuth();
+  });
+}
+
+// ── Init — load config first, then set up Supabase ───────────────────────────
+async function init() {
+  try {
+    const res  = await fetch('/.netlify/functions/config');
+    const data = await res.json();
+    SUPABASE_URL        = data.supabaseUrl;
+    SUPABASE_ANON       = data.supabaseAnon;
+    STRIPE_PAYMENT_LINK = data.stripeLink;
+    // Pass TMDB key to app.js
+    window.__tmdbKey = data.tmdbKey;
+  } catch (e) {
+    console.error('Could not load config:', e);
+    return;
+  }
+
+  // Init Supabase
+  sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+  // Restore session
+  const { data: { session } } = await sb.auth.getSession();
+  currentUser = session?.user || null;
+  if (currentUser) { await fetchProfile(currentUser); await handleStripeReturn(); }
+  updateHeaderAuth();
+  setupAuthListener();
+}
+
+init();
 
 // ── Expose for app.js ─────────────────────────────────────────────────────────
 window.Auth = {
-  isSwapPlus: () => isSwapPlus,
-  isLoggedIn: () => !!currentUser,
-  showPaywall: showPaywallModal,
-  showAuth:    showAuthModal,
+  isSwapPlus:       () => isSwapPlus,
+  isLoggedIn:       () => !!currentUser,
+  showPaywall:      showPaywallModal,
+  showAuth:         showAuthModal,
   getCloudLibrary,
   toggleCloudSave,
 };

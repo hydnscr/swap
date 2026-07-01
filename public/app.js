@@ -1,5 +1,5 @@
-//── Config ───────────────────────────────────────────────────────────────────
-const TMDB_KEY   = 'e51b8a5ecfa3b724ecee680963f354f0';
+// ── Config ───────────────────────────────────────────────────────────────────
+let TMDB_KEY = ''; // loaded from config via auth.js → window.__tmdbKey
 const FREE_LIMIT = 3;
 
 // ── Hero text per mode ────────────────────────────────────────────────────────
@@ -70,10 +70,19 @@ const streamModalContent = document.getElementById('stream-modal-content');
 const libraryNotice    = document.getElementById('library-notice');
 
 // ── Init ──────────────────────────────────────────────────────────────────────
-renderBgIcons(bgIcons, 'book');
+// Wait briefly for auth.js to load config and set window.__tmdbKey
+function waitForTmdbKey(cb, attempts = 0) {
+  if (window.__tmdbKey) { TMDB_KEY = window.__tmdbKey; cb(); }
+  else if (attempts < 20) setTimeout(() => waitForTmdbKey(cb, attempts + 1), 100);
+  else { console.warn('TMDB key not loaded'); cb(); }
+}
+
+waitForTmdbKey(() => {
+  renderBgIcons(bgIcons, 'book');
 renderBgIcons(bgIconsLib, 'book');
 updateCountryLabel();
 if (!userCountry) showCountryModal();
+});
 
 // ── Background SVG icons ──────────────────────────────────────────────────────
 function renderBgIcons(container, m) {
@@ -412,7 +421,7 @@ async function renderLibrary() {
       libraryNotice.classList.remove('hidden');
       document.getElementById('notice-upgrade')?.addEventListener('click', e => {
         e.preventDefault();
-        window.Auth?.showPaywall('upgrade');
+        window.Auth?.showPaywall();
       });
     }
   }
