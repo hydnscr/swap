@@ -77,15 +77,17 @@ function hideAuthModal() {
 }
 function showPaywallModal(reason = 'limit') {
   paywallModal.classList.remove('hidden');
-  const msg = document.getElementById('swaps-left-msg');
-  if (msg) {
-    if (reason === 'limit') {
-      msg.textContent = "You've used all 3 of your free swaps today.";
-    } else {
-      msg.textContent = "Unlock all features with Swap+.";
-    }
+  const msg   = document.getElementById('swaps-left-msg');
+  const title = document.getElementById('paywall-title');
+  if (reason === 'limit') {
+    if (title) title.textContent = "You've used your 3 free swaps today";
+    if (msg)   msg.textContent   = "Come back tomorrow for 3 more, or unlock Swap+ forever.";
+  } else {
+    if (title) title.textContent = "Unlock Swap+";
+    if (msg)   msg.textContent   = "Unlock all features with Swap+.";
   }
 }
+
 function hidePaywallModal() { paywallModal.classList.add('hidden'); }
 
 authClose.addEventListener('click', hideAuthModal);
