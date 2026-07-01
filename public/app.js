@@ -412,7 +412,7 @@ async function renderLibrary() {
       libraryNotice.classList.remove('hidden');
       document.getElementById('notice-upgrade')?.addEventListener('click', e => {
         e.preventDefault();
-        window.Auth?.showPaywall();
+        window.Auth?.showPaywall('upgrade');
       });
     }
   }
