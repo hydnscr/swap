@@ -161,7 +161,7 @@ async function fetchAutocomplete(q) {
   try {
     let items = [];
     if (mode === 'book') {
-      const res  = await fetch(`https://openlibrary.org/search.json?q=${enc(q)}&limit=15&fields=title,author_name,cover_i,first_sentence,key,edition_count,language`);
+      const res  = await fetch(`https://openlibrary.org/search.json?title=${enc(q)}&limit=15&fields=title,author_name,cover_i,first_sentence,key,edition_count,language`);
 const data = await res.json();
 items = (data.docs || [])
   .filter(b => !b.language || b.language.includes('eng') || b.language.includes('fre'))
