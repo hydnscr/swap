@@ -161,17 +161,18 @@ async function fetchAutocomplete(q) {
   try {
     let items = [];
     if (mode === 'book') {
-      const res = await fetch(`https://openlibrary.org/search.json?q=${enc(q)}&lang=eng&limit=8&fields=title,author_name,cover_i,first_sentence,key,edition_count&sort=editions`);
-      const data = await res.json();
-      items = (data.docs || [])
-        .sort((a, b) => (b.edition_count || 0) - (a.edition_count || 0))
-        .slice(0, 5)
-        .map(b => ({
-          title: b.title, subtitle: b.author_name?.[0] || '',
-          thumb: b.cover_i ? `https://covers.openlibrary.org/b/id/${b.cover_i}-S.jpg` : '',
-          cover: b.cover_i ? `https://covers.openlibrary.org/b/id/${b.cover_i}-M.jpg` : '',
-          synopsis: b.first_sentence?.[0] || '', type: 'book', author: b.author_name?.[0] || '', ol_key: b.key,
-        }));
+      const res  = await fetch(`https://openlibrary.org/search.json?q=${enc(q)}&limit=15&fields=title,author_name,cover_i,first_sentence,key,edition_count,language`);
+const data = await res.json();
+items = (data.docs || [])
+  .filter(b => !b.language || b.language.includes('eng') || b.language.includes('fre'))
+  .sort((a, b) => (b.edition_count || 0) - (a.edition_count || 0))
+  .slice(0, 5)
+  .map(b => ({
+    title: b.title, subtitle: b.author_name?.[0] || '',
+    thumb: b.cover_i ? `https://covers.openlibrary.org/b/id/${b.cover_i}-S.jpg` : '',
+    cover: b.cover_i ? `https://covers.openlibrary.org/b/id/${b.cover_i}-M.jpg` : '',
+    synopsis: b.first_sentence?.[0] || '', type: 'book', author: b.author_name?.[0] || '', ol_key: b.key,
+  }));
     } else {
       const res  = await fetch(`https://api.themoviedb.org/3/search/multi?query=${enc(q)}&api_key=${TMDB_KEY}&language=en-US`);
       const data = await res.json();
